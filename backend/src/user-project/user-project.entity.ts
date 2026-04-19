@@ -1,6 +1,9 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column,
-  ManyToOne
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  Column,
 } from 'typeorm';
 import { User } from '../user/user.entity';
 import { Project } from '../project/project.entity';
@@ -10,12 +13,14 @@ export class UserProject {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
-  role!: string; // admin, viewer
-
-  @ManyToOne(() => User, (user) => user.userProjects)
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => Project, (project) => project.userProjects)
+  @ManyToOne(() => Project)
+  @JoinColumn({ name: 'project_id' })
   project!: Project;
+
+  @Column()
+  role!: string;
 }

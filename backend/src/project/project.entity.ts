@@ -1,31 +1,36 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column,
-  ManyToOne, OneToMany, CreateDateColumn
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Company } from '../company/company.entity';
-import { UserProject } from '../user-project/user-project.entity';
-import { Dashboard } from '../dashboard/dashboard.entity';
 
 @Entity()
 export class Project {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ unique: true })
-  project_code!: string;
+  @Column({ name: 'project_code' })
+  projectCode!: string;
 
   @Column()
   name!: string;
 
-  @CreateDateColumn()
-  created_at!: Date;
+  // 🔥 description 추가
+  @Column()
+  description!: string;
 
-  @ManyToOne(() => Company, (company) => company.projects)
+  @ManyToOne(() => Company)
+  @JoinColumn({ name: 'company_id' })
   company!: Company;
 
-  @OneToMany(() => UserProject, (up) => up.project)
-  userProjects!: UserProject[];
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt!: Date;
 
-  @OneToMany(() => Dashboard, (dashboard) => dashboard.project)
-  dashboards!: Dashboard[];
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
 }

@@ -1,6 +1,9 @@
 import {
   Entity, PrimaryGeneratedColumn, Column,
-  ManyToOne, CreateDateColumn
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Project } from '../project/project.entity';
 
@@ -10,7 +13,7 @@ export class Dashboard {
   id!: number;
 
   @Column({ unique: true })
-  dashboard_code!: string;
+  dashboardCode!: string;
 
   @Column()
   name!: string;
@@ -18,9 +21,13 @@ export class Dashboard {
   @Column({ type: 'json' })
   config: any;
 
-  @CreateDateColumn()
-  created_at!: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt!: Date;
 
-  @ManyToOne(() => Project, (project) => project.dashboards)
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
+
+  @ManyToOne(() => Project)
+  @JoinColumn({ name: 'project_id' })
   project!: Project;
 }

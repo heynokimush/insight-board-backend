@@ -1,33 +1,39 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column,
-  ManyToOne, OneToMany, CreateDateColumn
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Company } from '../company/company.entity';
-import { UserProject } from '../user-project/user-project.entity';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ unique: true })
-  user_code!: string; // 랜덤 ID
+  @Column({ name: 'user_code' })
+  userCode!: string;
 
-  @Column({ unique: true })
+  @Column()
   email!: string;
 
   @Column()
   name!: string;
 
   @Column()
-  password!: string; // bcrypt
+  password!: string;
 
-  @CreateDateColumn()
-  created_at!: Date;
-
-  @ManyToOne(() => Company, (company) => company.users)
+  // 🔥 company relation (핵심)
+  @ManyToOne(() => Company)
+  @JoinColumn({ name: 'company_id' })
   company!: Company;
 
-  @OneToMany(() => UserProject, (up) => up.user)
-  userProjects!: UserProject[];
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
 }
