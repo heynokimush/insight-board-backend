@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
+import { RedisService } from '../common/redis/redis.service';
 
 import { User } from '../user/user.entity';
 import { UserProject } from '../user-project/user-project.entity';
@@ -12,6 +13,9 @@ import { LoginDto } from './dto/login.dto';
 @Injectable()
 export class AuthService {
   constructor(
+    private jwtService: JwtService,
+    private redisService: RedisService,
+    
     // User 테이블 접근
     @InjectRepository(User)
     private userRepo: Repository<User>,
@@ -48,10 +52,22 @@ export class AuthService {
     });
 
     // 4️⃣ JWT 토큰 생성
-    const accessToken = jwt.sign(
-      { sub: user.id }, // 토큰 payload
-      process.env.JWT_SECRET as string,
-      { expiresIn: '1h' },
+    const accessToken = this.jwtService.sign(
+        { sub: user.id },
+        { expiresIn: '1h' },
+    );
+
+    // ✅ Refresh Token
+    const refreshToken = this.jwtService.sign(
+        { sub: user.id },
+        { expiresIn: '7d' },
+    );
+
+    // ✅ Redis 저장
+    await this.redisService.set(
+        `refresh:${user.id}`,
+        refreshToken,
+        60 * 60 * 24 * 7,
     );
 
     // 만료 시간 (프론트에서 쓰기 좋게)
@@ -60,6 +76,7 @@ export class AuthService {
     // 5️⃣ 응답 형태 맞춰주기
     return {
       accessToken,
+      refreshToken, // 👉 컨트롤러에서 쿠키로 처리
       accessTokenExpiresAt: String(expiresAt),
       email: user.email,
       name: user.name,
